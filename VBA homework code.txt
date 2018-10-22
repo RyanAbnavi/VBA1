@@ -1,0 +1,163 @@
+' steps:
+' ----------------------------------------------------------------------------
+'1. Yearly change from what the stock opened the year at to what the closing price was.
+'2. The percent change from the what it opened the year at to what it closed.
+'3. The total Volume of the stock
+'4. You should also have conditional formatting that will highlight positive change in green and negative change in red.
+'5. locate the stock with the "Greatest % increase", "Greatest % Decrease" and "Greatest total volume".
+'6. Make the appropriate adjustments to your script that will allow it to run on every worksheet just by running it once
+Sub stock1()
+    ' ---------------------------------------------
+    ' loop through all sheets
+    ' ---------------------------------------------
+    For Each Sheet In Worksheets
+        ' header for some results columns
+        ' --------------------------------------------
+        ' Ticker
+        Sheet.Cells(1, 9).Value = "Ticker"
+        
+        ' Yearly Change
+        Sheet.Cells(1, 10).Value = "Yearly change"
+        
+        ' Percent Change
+        Sheet.Cells(1, 11).Value = "Percent change"
+        
+        ' Total stock volume
+        Sheet.Cells(1, 12).Value = "Total Stock Volume"
+        
+        Sheet.Cells(1, 16).Value = "Ticker"
+        
+        Sheet.Cells(1, 17).Value = "Value"
+
+        Sheet.Cells(2, 15).Value = "Greatest % increase"
+        Sheet.Cells(3, 15).Value = "Greatest % decrease"
+        Sheet.Cells(4, 15).Value = "Greatest Total Volume"
+
+        
+        ' ---------------------------------------------
+        ' finding each specific stock
+        ' ---------------------------------------------
+        ' finding the total number of iteration by obtaining the number of rows in stock column
+        lastrow = Sheet.Cells(Rows.Count, 1).End(xlUp).Row
+        ' MsgBox lastrow
+        ' rows count for each unique stock in column J
+        Count = 1
+        count1 = 1
+        ' each specific stock volume
+        stock_volume = 0
+        
+        ' iteration over the stock column
+        ' ---------------------------------------------
+        ' finding each specific stock and its total volume
+        '----------------------------------------------
+            For i = 2 To lastrow
+            
+            ' finding each unique stock
+                If Sheet.Cells(i, 1).Value <> Sheet.Cells(i + 1, 1).Value Then
+                
+                ' in case that a new stock found add 1 to row number in stock column
+                Count = Count + 1
+                
+                ' assign the stock name to stock column
+                Sheet.Cells(Count, 9).Value = Sheet.Cells(i, 1).Value
+                 
+                ' adding stock volume
+                stock_volume = stock_volume + Sheet.Cells(i, 7)
+                
+                ' assigning the stock volume to total volume column
+                Sheet.Cells(Count, 12).Value = stock_volume
+                
+                ' resetting the stock volume to zero for the next stock
+                stock_volume = 0
+                
+                ' if same stock exists in a few row immediately after
+                Else
+                
+                ' adding stock volume
+                stock_volume = stock_volume + Sheet.Cells(i, 7)
+                
+                End If
+                '------------------------------------------
+                ' finding Yearly change and percent change
+                ' -----------------------------------------
+                ' open price assigning
+                If (Sheet.Cells(i, 1).Value <> Sheet.Cells(i - 1, 1).Value) Then
+                count1 = count1 + 1
+                
+                opn = Sheet.Cells(i, 3).Value
+                
+                ' close price assigning
+                ElseIf (Sheet.Cells(i, 1).Value <> Sheet.Cells(i + 1, 1).Value) Then
+                
+                cls = Sheet.Cells(i, 6).Value
+                
+                
+                'Yearly Change
+                ch = opn - cls
+                Sheet.Cells(count1, 10).Value = ch
+                    
+                    ' making positive change green and negative change red
+                    If Sheet.Cells(count1, 10) > 0 Then
+                    Sheet.Cells(count1, 10).Interior.ColorIndex = 4
+                    Else
+                    Sheet.Cells(count1, 10).Interior.ColorIndex = 3
+                    End If
+                
+                ' Percent change
+                ' because their might be some stocks which starts with zero at the beginning then to prevent
+                ' deviding to zero it is better to have a conditional statement for such cases
+                    If opn = 0 Then
+                    pch = 0
+                    Else
+                    pch = ch / opn
+                    End If
+                    
+                Sheet.Cells(count1, 11).Value = pch
+                
+                'Percent format
+                Sheet.Cells(count1, 11).NumberFormat = "0.00%"
+                End If
+                               
+            ' next iteration
+            Next i
+            
+             '------------------------------------------
+             ' finding Greatest % Increase, Decrease and Total volume
+             ' -----------------------------------------
+             'total number of stocks
+        lastrow1 = Sheet.Cells(Rows.Count, 11).End(xlUp).Row
+        
+            ' Iterating over stocks to find the greatest increase and decrease
+            For j = 2 To lastrow1
+            
+                ' greatest % change
+                If Sheet.Cells(j, 11) > Sheet.Cells(2, 17) Then
+                Sheet.Cells(2, 16) = Sheet.Cells(j, 9)
+                Sheet.Cells(2, 17) = Sheet.Cells(j, 11)
+                
+                'cell format
+                Sheet.Cells(2, 17).NumberFormat = "0.00%"
+                
+                'Greatest % decrease
+                ElseIf Sheet.Cells(j, 11) < Sheet.Cells(3, 17) Then
+                Sheet.Cells(3, 16) = Sheet.Cells(j, 9)
+                Sheet.Cells(3, 17) = Sheet.Cells(j, 11)
+                
+                'cell format
+                Sheet.Cells(3, 17).NumberFormat = "0.00%"
+                
+                End If
+                
+                ' Iterating over stocks to find the greatest total volume
+                If Sheet.Cells(j, 12) > Sheet.Cells(4, 17) Then
+                Sheet.Cells(4, 16) = Sheet.Cells(j, 9)
+                Sheet.Cells(4, 17) = Sheet.Cells(j, 12)
+                
+                End If
+                
+            Next j
+ Next Sheet
+
+End Sub
+
+
